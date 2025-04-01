@@ -42,7 +42,7 @@ min_samples_leaves = [1, 5, 10, 20, 50]
 criterions = ["gini", "entropy"]
 max_features_options = [None, "sqrt", "log2"]
 splitters = ["best", "random"]
-random_states = [42, 0, 1, 42, 123]  # Différents random_state à tester
+random_states = [42, 0, 1, 123]  # Différents random_state à tester
 
 # Compteur de tests
 total_tests = len(max_depths) * len(min_samples_splits) * len(min_samples_leaves) * len(criterions) * len(max_features_options) * len(splitters) * len(random_states)
@@ -50,18 +50,21 @@ test_count = 0
 
 print(f"🔍 Début des tests... ({total_tests} combinaisons possibles)\n")
 
+# Dictionnaire pour stocker les résultats moyens de chaque combinaison
+accuracies_dict = {}
+
 # Boucles imbriquées pour tester toutes les combinaisons
 start_time = time.time()
-for depth, split, leaf, criterion, max_feat, splitter, rand_state in itertools.product(
-    max_depths, min_samples_splits, min_samples_leaves, criterions, max_features_options, splitters, random_states):
+for depth, split, leaf, criterion, max_feat, splitter in itertools.product(
+    max_depths, min_samples_splits, min_samples_leaves, criterions, max_features_options, splitters):
 
     # Variable pour stocker les précisions pour chaque random_state
-    accuracies = []
+    accuracies_per_combination = []
 
     # Test avec plusieurs random_state
-    for rs in random_states:
+    for rand_state in random_states:
         # Division en ensemble d'entraînement et de test avec random_state actuel
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=rs)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=rand_state)
 
         # Création du modèle avec les hyperparamètres actuels
         clf = DecisionTreeClassifier(
@@ -71,7 +74,7 @@ for depth, split, leaf, criterion, max_feat, splitter, rand_state in itertools.p
             min_samples_leaf=leaf,
             max_features=max_feat,
             splitter=splitter,
-            random_state=rs
+            random_state=rand_state
         )
 
         # Entraînement du modèle
@@ -82,28 +85,30 @@ for depth, split, leaf, criterion, max_feat, splitter, rand_state in itertools.p
 
         # Évaluation de la précision
         accuracy = metrics.accuracy_score(y_test, y_pred)
-        accuracies.append(accuracy)
+        accuracies_per_combination.append(accuracy)
 
-    # Calcul de la moyenne de la précision
-    avg_accuracy = np.mean(accuracies)
-    test_count += 1
+    # Calcul de la moyenne de la précision pour cette combinaison de paramètres
+    mean_accuracy = np.mean(accuracies_per_combination)
+    accuracies_dict[(depth, split, leaf, criterion, max_feat, splitter)] = mean_accuracy
 
     # Affichage des résultats intermédiaires tous les 500 tests
+    test_count += 1
     if test_count % 500 == 0:
-        print(f"Test {test_count}/{total_tests} -> depth={depth}, split={split}, leaf={leaf}, criterion={criterion}, max_feat={max_feat}, splitter={splitter}, random_state={rand_state} | Avg Accuracy: {avg_accuracy:.4f}")
+        print(f"Test {test_count}/{total_tests} -> depth={depth}, split={split}, leaf={leaf}, criterion={criterion}, max_feat={max_feat}, splitter={splitter} | Mean Accuracy: {mean_accuracy:.4f}")
 
-    # Stockage des meilleurs hyperparamètres
-    if avg_accuracy > best_accuracy:
-        best_accuracy = avg_accuracy
-        best_params = {
-            "max_depth": depth,
-            "min_samples_split": split,
-            "min_samples_leaf": leaf,
-            "criterion": criterion,
-            "max_features": max_feat,
-            "splitter": splitter,
-            "random_state": rand_state
-        }
+# Trouver la meilleure combinaison d'hyperparamètres basée sur la précision moyenne
+best_combination = max(accuracies_dict, key=accuracies_dict.get)
+best_accuracy = accuracies_dict[best_combination]
+
+# Stockage des meilleurs paramètres
+best_params = {
+    "max_depth": best_combination[0],
+    "min_samples_split": best_combination[1],
+    "min_samples_leaf": best_combination[2],
+    "criterion": best_combination[3],
+    "max_features": best_combination[4],
+    "splitter": best_combination[5]
+}
 
 # Fin du test
 end_time = time.time()
