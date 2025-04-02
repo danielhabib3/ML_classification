@@ -20,9 +20,6 @@ BATCH_SIZE = 64
 LEARNING_RATE = 0.001
 EPOCHS = 500
 
-current_date = datetime.now().strftime("%m-%d_%H-%M")
-MODEL_PATH = f"saved_models/saved_{args.model_name}_{current_date}_epochs{EPOCHS}.pth"
-
 # On utilise le GPU pour aller + vite !
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Utilisation de : {device}")
@@ -32,6 +29,9 @@ parser = argparse.ArgumentParser(description="Entraînement d'un modèle de clas
 parser.add_argument("--model_name", type=str, default="TransformerModel", help="Nom du modèle à utiliser (doit être défini dans models.py)")
 parser.add_argument("--split_eval", action="store_true", help="Séparer le dataset en 90% train et 10% évaluation")
 args = parser.parse_args()
+
+current_date = datetime.now().strftime("%m-%d_%H-%M")
+MODEL_PATH = f"saved_models/saved_{args.model_name}_{current_date}_epochs{EPOCHS}.pth"
 
 # Vérifier si le modèle existe
 if not hasattr(models, args.model_name):
