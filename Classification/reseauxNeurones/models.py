@@ -37,7 +37,7 @@ class SimplifiedTransformerModel(nn.Module):
     
 
 class TransformerModelDropOut(nn.Module):
-    def __init__(self, input_dim, num_heads=4, hidden_dim=128, num_layers=2, dropout=0.25):
+    def __init__(self, input_dim, num_heads=4, hidden_dim=128, num_layers=2, dropout=0.3):
         super(TransformerModelDropOut, self).__init__()  # Correction ici !
         self.embedding = nn.Linear(input_dim, hidden_dim)
         self.pos_encoder = nn.LayerNorm(hidden_dim)

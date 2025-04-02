@@ -7,3 +7,7 @@
 ## Simple Transformer Model : IDem que réseau de neurones très simple (un peu mieux sur training mais overfitting aussi)
 
 ##  Transformer Model + Dropout de 0.5: Pas d'overfitting mais pas de bons résultats non plus 
+
+##  Transformer Model + Dropout de 0.3: Overfitting idem qu'avec dropout 0.1
+
+# MAX EVALUATION ACCURACY POUR LE MOMENT : 82-83%
