@@ -10,12 +10,18 @@ import matplotlib.pyplot as plt
 from data_processing import load_data
 import models 
 from sklearn.metrics import accuracy_score
+from datetime import datetime
+import signal
+import sys
 
 TRAIN_CSV = "../../data/classification/train.csv"
 MODEL_PATH = "saved_models/saved_model.pth"
 BATCH_SIZE = 64
 LEARNING_RATE = 0.001
 EPOCHS = 500
+
+current_date = datetime.now().strftime("%m-%d_%H-%M")
+MODEL_PATH = f"saved_models/saved_{args.model_name}_{current_date}_epochs{EPOCHS}.pth"
 
 # On utilise le GPU pour aller + vite !
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -33,6 +39,15 @@ if not hasattr(models, args.model_name):
 
 # Charger le modèle
 ModelClass = getattr(models, args.model_name)
+
+# POur enregistrer si on arrête pendant training
+def save_and_exit(sig, frame):
+    print("\nInterruption détectée ! Sauvegarde du modèle en cours...")
+    torch.save(model.state_dict(), MODEL_PATH)
+    print(f"Modèle sauvegardé sous {MODEL_PATH}")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, save_and_exit)
 
 if __name__ == "__main__":
     # Chargement des données
@@ -115,6 +130,9 @@ if __name__ == "__main__":
             print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Train Acc: {train_accuracy*100:.2f}%")
 
     # Sauvegarde du modèle
+
+
+    # Générer un nom de fichier dynamique
     torch.save(model.state_dict(), MODEL_PATH)
     print(f"Modèle sauvegardé sous {MODEL_PATH}")
 
