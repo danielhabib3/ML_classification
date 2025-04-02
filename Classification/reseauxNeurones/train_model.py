@@ -2,29 +2,32 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, random_split
 import numpy as np
 import pandas as pd
+import os
+import matplotlib.pyplot as plt
 from data_processing import load_data
 import models 
-from sklearn.metrics import accuracy_score  # Importer pour calculer la précision
+from sklearn.metrics import accuracy_score
 
 TRAIN_CSV = "../../data/classification/train.csv"
 MODEL_PATH = "saved_models/saved_model.pth"
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 LEARNING_RATE = 0.001
-EPOCHS = 50
+EPOCHS = 500
 
 # On utilise le GPU pour aller + vite !
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Utilisation de : {device}")
 
-# Argument ligne de commandes pour choisir modèle
+# Argument ligne de commandes
 parser = argparse.ArgumentParser(description="Entraînement d'un modèle de classification.")
 parser.add_argument("--model_name", type=str, default="TransformerModel", help="Nom du modèle à utiliser (doit être défini dans models.py)")
+parser.add_argument("--split_eval", action="store_true", help="Séparer le dataset en 90% train et 10% évaluation")
 args = parser.parse_args()
 
-# Vérifier si le modèle existe dans models.py
+# Vérifier si le modèle existe
 if not hasattr(models, args.model_name):
     raise ValueError(f"Modèle '{args.model_name}' non trouvé dans models.py")
 
@@ -36,24 +39,44 @@ if __name__ == "__main__":
     X, y = load_data(TRAIN_CSV)
 
     # Conversion en tenseurs PyTorch
-    X_train_tensor = torch.tensor(X.values, dtype=torch.float32).to(device)  
-    y_train_tensor = torch.tensor(y.values, dtype=torch.float32).unsqueeze(1).to(device) 
+    X_tensor = torch.tensor(X.values, dtype=torch.float32).to(device)
+    y_tensor = torch.tensor(y.values, dtype=torch.float32).unsqueeze(1).to(device)
 
-    # Création du DataLoader
-    train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+    # Séparation train/eval si demandé
+    if args.split_eval:
+        total_size = len(X_tensor)
+        train_size = int(0.9 * total_size)
+        eval_size = total_size - train_size
+        train_dataset, eval_dataset = random_split(TensorDataset(X_tensor, y_tensor), [train_size, eval_size])
+    else:
+        train_dataset = TensorDataset(X_tensor, y_tensor)
+        eval_dataset = None
+
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    eval_loader = DataLoader(eval_dataset, batch_size=BATCH_SIZE) if eval_dataset else None
 
-    # Initialise le modèle
+    # Initialisation du modèle
     model = ModelClass(X.shape[1]).to(device)
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    # Chargement du modèle pré-entraîné si dispo
+    if os.path.exists(MODEL_PATH):
+        print(f"Chargement du modèle pré-entraîné depuis {MODEL_PATH}")
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+    else:
+        print("Aucun modèle pré-entraîné trouvé. Début de l'entraînement à partir de zéro.")
+
+    # Listes pour stocker les métriques
+    loss_history = []
+    train_acc_history = []
+    eval_acc_history = []
 
     # Boucle de Training
     for epoch in range(EPOCHS):
         model.train()
         total_loss = 0
-        all_preds = []  # Liste pour stocker toutes les prédictions
-        all_labels = []  # Liste pour stocker toutes les étiquettes réelles
+        all_preds, all_labels = [], []
 
         for batch_X, batch_y in train_loader:
             batch_X, batch_y = batch_X.to(device), batch_y.to(device)
@@ -63,20 +86,46 @@ if __name__ == "__main__":
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
-
-            # Stocker les prédictions et les labels pour calculer la précision plus tard
             all_preds.append(outputs.cpu().detach().numpy())
             all_labels.append(batch_y.cpu().detach().numpy())
 
-        # Convertir les prédictions et labels en arrays numpy
-        all_preds = np.concatenate(all_preds, axis=0)
+        all_preds = (np.concatenate(all_preds, axis=0) > 0.5).astype(int)
         all_labels = np.concatenate(all_labels, axis=0)
+        train_accuracy = accuracy_score(all_labels, all_preds)
 
-        # Calcul de la précision
-        all_preds = (all_preds > 0.5).astype(int)  # Convertir en 0 ou 1
-        accuracy = accuracy_score(all_labels, all_preds)
-        print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Accuracy: {accuracy*100:.2f}%")
+        loss_history.append(total_loss / len(train_loader))
+        train_acc_history.append(train_accuracy)
+
+        # Évaluation sur le dataset d'évaluation
+        if eval_loader:
+            model.eval()
+            eval_preds, eval_labels = [], []
+            with torch.no_grad():
+                for batch_X, batch_y in eval_loader:
+                    batch_X, batch_y = batch_X.to(device), batch_y.to(device)
+                    outputs = model(batch_X)
+                    eval_preds.append(outputs.cpu().numpy())
+                    eval_labels.append(batch_y.cpu().numpy())
+            eval_preds = (np.concatenate(eval_preds, axis=0) > 0.5).astype(int)
+            eval_labels = np.concatenate(eval_labels, axis=0)
+            eval_accuracy = accuracy_score(eval_labels, eval_preds)
+            eval_acc_history.append(eval_accuracy)
+            print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Train Acc: {train_accuracy*100:.2f}%, Eval Acc: {eval_accuracy*100:.2f}%")
+        else:
+            print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Train Acc: {train_accuracy*100:.2f}%")
 
     # Sauvegarde du modèle
     torch.save(model.state_dict(), MODEL_PATH)
     print(f"Modèle sauvegardé sous {MODEL_PATH}")
+
+    # Affichage des courbes
+    plt.figure(figsize=(10, 5))
+    plt.plot(loss_history, label='Loss')
+    plt.plot(train_acc_history, label='Train Accuracy')
+    if eval_loader:
+        plt.plot(eval_acc_history, label='Eval Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Metrics')
+    plt.legend()
+    plt.title('Training Progress')
+    plt.show()
