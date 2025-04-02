@@ -1,19 +1,24 @@
 import torch
 import pandas as pd
+import argparse
 from models import TransformerModel
 from data_processing import load_data
 from sklearn.metrics import accuracy_score  # Importer pour calculer la précision
 
 TEST_CSV = "../../data/classification/test.csv"
-MODEL_PATH = "saved_models/saved_model.pth" 
 SUBMISSION_CSV = "predictions.csv"
 
-# On utilise le GPU !
+# Parser les arguments de la ligne de commande
+parser = argparse.ArgumentParser(description='Script de prédiction avec un modèle Transformer')
+parser.add_argument('model_path', type=str, help='Chemin vers le fichier du modèle sauvegardé')
+args = parser.parse_args()
+
+# On utilise le GPU si disponible
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Charger le modèle déjà calculé
-model = TransformerModel(input_dim=7).to(device) 
-model.load_state_dict(torch.load(MODEL_PATH))
+# Charger le modèle
+model = TransformerModel(input_dim=7).to(device)
+model.load_state_dict(torch.load(args.model_path))
 model.eval()
 
 # Charger les données

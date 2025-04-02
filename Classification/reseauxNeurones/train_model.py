@@ -18,7 +18,7 @@ from datetime import datetime
 TRAIN_CSV = "../../data/classification/train.csv"
 BATCH_SIZE = 64
 LEARNING_RATE = 0.001
-EPOCHS = 200
+EPOCHS = 500
 WEIGHT_DECAY = 1e-4
 
 
