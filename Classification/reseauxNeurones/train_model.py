@@ -17,7 +17,7 @@ from datetime import datetime
 TRAIN_CSV = "../../data/classification/train.csv"
 BATCH_SIZE = 64
 LEARNING_RATE = 0.001
-EPOCHS = 200
+EPOCHS = 500
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Utilisation de : {device}")
@@ -35,6 +35,15 @@ ModelClass = getattr(models, args.model_name)
 
 current_date = datetime.now().strftime("%m-%d_%H-%M")
 MODEL_PATH = f"saved_models/saved_{args.model_name}_{current_date}_epochs{EPOCHS}.pth"
+
+# POur enregistrer si on arrête pendant training
+def save_and_exit(sig, frame):
+    print("\nInterruption détectée ! Sauvegarde du modèle en cours...")
+    torch.save(model.state_dict(), MODEL_PATH)
+    print(f"Modèle sauvegardé sous {MODEL_PATH}")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, save_and_exit)
 
 if __name__ == "__main__":
     # Chargement des données
