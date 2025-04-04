@@ -16,10 +16,10 @@ from datetime import datetime
 
 # Paramètres
 TRAIN_CSV = "../../data/classification/train.csv"
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EPOCHS = 500
-WEIGHT_DECAY = 1e-4
+WEIGHT_DECAY = 0
 
 
 # Fixer la seed pour garantir la reproductibilité
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # Définition de la fonction de perte et de l'optimiseur
     criterion = nn.BCELoss()
     #optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
     # Variables pour suivre les historiques
     loss_history = []
