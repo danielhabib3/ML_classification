@@ -1,9 +1,10 @@
-import csv
+import numpy as np # linear algebraimport csv
 import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import os
+import csv
 
 # Chemins
 path_classification_data = "../data/classification/"
@@ -23,14 +24,14 @@ with open(path_test_csv) as my_csv_test_file:
 df_test = pd.DataFrame(header_and_data_test[1:], columns=header_and_data_test[0])
 
 # Séparer X/y pour train.csv
-drop_add = ['ab_demand', 'bc_demand']
+drop_add = ['bc_demand','transfer']
 to_drop =  ['id', 'bc_price_evo'] + drop_add
 X = df_train_full.drop(columns=to_drop)
 y = df_train_full['bc_price_evo']
 
 # Paramètres
 test_size = 0.0  # Change à 0.1 pour activer la validation
-n_estimators = 50000
+n_estimators = 100000
 learning_rate = 0.1
 max_depth = 7
 
@@ -80,3 +81,5 @@ output_csv_path = os.path.join("submit/", filename)
 # Sauvegarde
 df_predictions.to_csv(output_csv_path, index=False)
 print("Fichier enregistré :", output_csv_path)
+
+
