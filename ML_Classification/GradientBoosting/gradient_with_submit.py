@@ -23,12 +23,14 @@ with open(path_test_csv) as my_csv_test_file:
 df_test = pd.DataFrame(header_and_data_test[1:], columns=header_and_data_test[0])
 
 # Séparer X/y pour train.csv
-X = df_train_full.drop(columns=['id', 'bc_price_evo'])
+drop_add = ['transfer', 'bc_demand']
+to_drop =  ['id', 'bc_price_evo'] + drop_add
+X = df_train_full.drop(columns=to_drop)
 y = df_train_full['bc_price_evo']
 
 # Paramètres
-test_size = 0.1  # Change à 0.1 pour activer la validation
-n_estimators = 10000
+test_size = 0.0  # Change à 0.1 pour activer la validation
+n_estimators = 4
 learning_rate = 0.1
 max_depth = 7
 
@@ -59,7 +61,8 @@ else:
     print("Aucune validation interne (test_size = 0)")
 
 # Prédiction sur test.csv
-X_test = df_test.drop(columns=['id'])
+to_drop_test = list(set(to_drop) - {'bc_price_evo'})  # Utiliser set() pour faire la différence
+X_test = df_test.drop(columns = to_drop_test)
 y_test_pred = clf.predict(X_test)
 
 # Création de la DataFrame de sortie
