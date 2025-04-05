@@ -51,3 +51,7 @@ Combo supprimé : ['transfer', 'hour', 'bc_demand'] --> Accuracy = 92.97%
 Combo supprimé : ['ab_demand', 'hour', 'bc_demand'] --> Accuracy = 93.38%
 ['transfer', 'ab_demand', 'hour', 'bc_demand']
 Combo supprimé : ['transfer', 'ab_demand', 'hour', 'bc_demand'] --> Accuracy = 93.14%
+
+
+
+AVEC 5000 le meilleur est ab_demand bc_demeande puis ab_demand, bc_demand, transfer

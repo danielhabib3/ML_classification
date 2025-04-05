@@ -23,14 +23,14 @@ with open(path_test_csv) as my_csv_test_file:
 df_test = pd.DataFrame(header_and_data_test[1:], columns=header_and_data_test[0])
 
 # Séparer X/y pour train.csv
-drop_add = ['transfer', 'bc_demand']
+drop_add = ['ab_demand', 'bc_demand']
 to_drop =  ['id', 'bc_price_evo'] + drop_add
 X = df_train_full.drop(columns=to_drop)
 y = df_train_full['bc_price_evo']
 
 # Paramètres
 test_size = 0.0  # Change à 0.1 pour activer la validation
-n_estimators = 4
+n_estimators = 50000
 learning_rate = 0.1
 max_depth = 7
 
