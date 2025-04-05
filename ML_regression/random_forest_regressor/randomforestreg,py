@@ -9,8 +9,8 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
 
-train_data = pd.read_csv('train.csv')
-test_data = pd.read_csv('test.csv')
+train_data = pd.read_csv('data/regression/train.csv')
+test_data = pd.read_csv('data/regression/test.csv')
 
 
 def preprocess_data(train_data, test_data):
