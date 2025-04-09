@@ -20,11 +20,10 @@ with open(path_test_csv) as my_csv_test_file:
     header_and_data_test = list(csv.reader(my_csv_test_file, delimiter=','))
 df_test = pd.DataFrame(header_and_data_test[1:], columns=header_and_data_test[0])
 
-# Cast (important si les données sont en string à cause du CSV)
 df_train_full = df_train_full.astype(float, errors='ignore')
 df_test = df_test.astype(float, errors='ignore')
 
-# Combos à tester spécifiquement
+# Combos à tester
 combos_to_test = [
     ['transfer', 'bc_demand'],
     ['ab_demand', 'bc_demand'],

@@ -30,7 +30,7 @@ X = df_train_full.drop(columns=to_drop)
 y = df_train_full['bc_price_evo']
 
 # Paramètres
-test_size = 0.0  # Change à 0.1 pour activer la validation
+test_size = 0.0 
 n_estimators = 100000
 learning_rate = 0.1
 max_depth = 7
@@ -51,7 +51,7 @@ clf = GradientBoostingClassifier(
 )
 clf.fit(X_train, y_train)
 
-# Accuracy (si validation activée)
+# Accuracy (si possible)
 if test_size > 0:
     y_val_pred = clf.predict(X_val)
     accuracy = accuracy_score(y_val, y_val_pred)
@@ -62,23 +62,23 @@ else:
     print("Aucune validation interne (test_size = 0)")
 
 # Prédiction sur test.csv
-to_drop_test = list(set(to_drop) - {'bc_price_evo'})  # Utiliser set() pour faire la différence
+to_drop_test = list(set(to_drop) - {'bc_price_evo'})  
 X_test = df_test.drop(columns = to_drop_test)
 y_test_pred = clf.predict(X_test)
 
-# Création de la DataFrame de sortie
+# Création DataFrame de sortie
 df_predictions = pd.DataFrame({
     'id': df_test['id'],
     'bc_price_evo': y_test_pred
 })
 
-# Nom du fichier
+# Nom du fichier qui sera submit sur kaggle
 filename = (
     f"predictions_gb_n{n_estimators}_lr{learning_rate}_d{max_depth}_acc{accuracy_percent}.csv"
 )
 output_csv_path = os.path.join("submit/", filename)
 
-# Sauvegarde
+# Sauvegarde fichier submit
 df_predictions.to_csv(output_csv_path, index=False)
 print("Fichier enregistré :", output_csv_path)
 
