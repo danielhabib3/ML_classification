@@ -5,21 +5,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Path to the dataset
-TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
-                          "classification", "train.csv")
-TEST_PATH = os.path.join(BASE_DIR, "..", "data",
-                         "classification", "test.csv")
-
+# Chemins
+path_classification_data = "../data/classification/"
+path_train_csv = f"{path_classification_data}/train.csv"
+path_test_csv = f"{path_classification_data}/test.csv"
 
 # Lecture du train.csv
-with open(TRAIN_PATH) as my_csv_file:
+with open(path_train_csv) as my_csv_file:
     header_and_data = list(csv.reader(my_csv_file, delimiter=','))
 df_train_full = pd.DataFrame(header_and_data[1:], columns=header_and_data[0])
 
 # Lecture du test.csv
-with open(TEST_PATH) as my_csv_test_file:
+with open(path_test_csv) as my_csv_test_file:
     header_and_data_test = list(csv.reader(my_csv_test_file, delimiter=','))
 df_test = pd.DataFrame(
     header_and_data_test[1:], columns=header_and_data_test[0])
