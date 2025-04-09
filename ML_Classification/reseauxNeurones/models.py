@@ -1,6 +1,24 @@
 import torch.nn as nn
 import torch
 
+
+class SimpleModel(nn.Module):
+    def __init__(self, input_dim, hidden_dim=6, dropout=0.1):
+        super(SimpleModel, self).__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(dropout)
+        self.fc2 = nn.Linear(hidden_dim, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        return self.sigmoid(x)
+
+
 class TransformerModel(nn.Module):
     def __init__(self, input_dim, num_heads=4, hidden_dim=128, num_layers=2, dropout=0.1):
         super(TransformerModel, self).__init__()
@@ -19,7 +37,7 @@ class TransformerModel(nn.Module):
         return self.sigmoid(x)
 
 class SimplifiedTransformerModel(nn.Module):
-    def __init__(self, input_dim, num_heads=2, hidden_dim=64, dropout=0.3):
+    def __init__(self, input_dim, num_heads=2, hidden_dim=64, dropout=0.1):
         super(SimplifiedTransformerModel, self).__init__()
         self.embedding = nn.Linear(input_dim, hidden_dim)
         self.pos_encoder = nn.LayerNorm(hidden_dim)

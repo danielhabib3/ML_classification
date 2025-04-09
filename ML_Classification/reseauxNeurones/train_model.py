@@ -23,22 +23,22 @@ WEIGHT_DECAY = 0
 
 
 # Fixer la seed pour garantir la reproductibilité
-SEED = 42  # Choisir une seed fixe
+SEED = 42  
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
-# Dispositif (CUDA si disponible, sinon CPU)
+# Utiliser gpu si possible car training très long sans gpu donc chiant pour test
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Utilisation de : {device}")
 
-# Parsing des arguments
+# Args
 parser = argparse.ArgumentParser(description="Entraînement d'un modèle de classification.")
 parser.add_argument("--model_name", type=str, default="TransformerModel", help="Nom du modèle à utiliser (doit être défini dans models.py)")
 parser.add_argument("--model_file", type=str, help="Chemin du fichier modèle à charger (optionnel)")
 parser.add_argument("--split_eval", action="store_true", help="Séparer le dataset en 90% train et 10% évaluation")
 args = parser.parse_args()
 
-# Vérification du modèle
+# Vérification du modèle fourni s'il est bien dans models.py
 if not hasattr(models, args.model_name):
     raise ValueError(f"Modèle '{args.model_name}' non trouvé dans models.py")
 

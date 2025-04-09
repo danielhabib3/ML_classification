@@ -19,8 +19,6 @@ with open(TRAIN_PATH) as my_csv_file:
 
 # Conversion en DataFrame
 df = pd.DataFrame(header_and_data[1:], columns=header_and_data[0])
-
-# Convertir les colonnes en numériques si nécessaire
 df = df.apply(pd.to_numeric, errors='ignore')
 
 # Séparer les données
@@ -41,9 +39,9 @@ param_grid = {
     'max_depth': [2, 3, 4, 5, 7]
 }
 
-# Grid Search avec validation croisée
+# Grid Search
 grid_search = GridSearchCV(
-    GradientBoostingClassifier(n_estimators=500, random_state=0),
+    GradientBoostingClassifier(n_estimators=500, random_state=0), # On fixe n_estimators car on sait grâce à nos anciens tests que si c'est trop élévé, le grid_search va être trop long et d'ailleurs, o nsait déjà que plus on l'augmente mieux c'est
     param_grid,
     cv=5,
     scoring='accuracy',
@@ -54,10 +52,8 @@ grid_search = GridSearchCV(
 # Entraînement
 grid_search.fit(X_train, y_train)
 
-# Meilleurs paramètres
 print("Meilleurs paramètres trouvés :", grid_search.best_params_)
 
-# Prédictions avec le meilleur modèle
 best_model = grid_search.best_estimator_
 y_pred = best_model.predict(X_test)
 
@@ -67,11 +63,14 @@ df_predictions = pd.DataFrame({
     'bc_price_evo': y_pred
 })
 
+<<<<<<< HEAD:ML_Classification/GradientBoosting/grid_search.py
 # Précision
 accuracy = (df_predictions['bc_price_evo'].values ==
             y_test.values).mean() * 100
+=======
+accuracy = (df_predictions['bc_price_evo'].values == y_test.values).mean() * 100
+>>>>>>> 1a1e2532ca6f48553a033f7093d2429f1e6a952b:ML_Classification/GradientBoosting/grid_search_initial.py
 print(f"Précision du modèle (Gradient Boosting optimisé) : {accuracy:.2f}%")
 
-# Rapport de classification
 print("\nRapport de classification :")
 print(classification_report(y_test, y_pred))
