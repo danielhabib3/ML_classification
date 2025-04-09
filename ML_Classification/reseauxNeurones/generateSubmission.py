@@ -3,12 +3,11 @@ import pandas as pd
 import argparse
 from models import TransformerModel
 from data_processing import load_data
-from sklearn.metrics import accuracy_score  # Importer pour calculer la précision
+from sklearn.metrics import accuracy_score  
 
 TEST_CSV = "../../data/classification/test.csv"
 SUBMISSION_CSV = "predictions.csv"
 
-# Parser les arguments de la ligne de commande
 parser = argparse.ArgumentParser(description='Script de prédiction avec un modèle Transformer')
 parser.add_argument('model_path', type=str, help='Chemin vers le fichier du modèle sauvegardé')
 args = parser.parse_args()
@@ -16,15 +15,13 @@ args = parser.parse_args()
 # On utilise le GPU si disponible
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Charger le modèle
+# Charger le modèle si on en a fourni en ligne de commandes
 model = TransformerModel(input_dim=7).to(device)
 model.load_state_dict(torch.load(args.model_path))
 model.eval()
 
-# Charger les données
+# Charger les datasets et les convertir en tenseurs pytorch
 X_train, y_train, X_test, ids = load_data("../../data/classification/train.csv", TEST_CSV)
-
-# Conversion des données d'entraînement en tenseurs
 X_train_tensor = torch.tensor(X_train.to_numpy(), dtype=torch.float32).to(device)
 y_train_tensor = torch.tensor(y_train.to_numpy(), dtype=torch.float32).unsqueeze(1).to(device)
 
