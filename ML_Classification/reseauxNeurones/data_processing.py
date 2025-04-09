@@ -7,8 +7,8 @@ def load_data(train_path, test_path=None):
     df_train['bc_price_evo'] = df_train['bc_price_evo'].map({'DOWN': 0, 'UP': 1}) # On convertit les données catégorielles en valeurs numériques
 
     features = df_train.columns[:-1]  # On prend tout sauf la cible
-    X = df_train[features].astype(np.float32) # On force les types
-    y = df_train['bc_price_evo'].astype(np.int32)  # On force les types
+    X = df_train[features].astype(np.float32) 
+    y = df_train['bc_price_evo'].astype(np.int32)
 
     if test_path:
         df_test = pd.read_csv(test_path)

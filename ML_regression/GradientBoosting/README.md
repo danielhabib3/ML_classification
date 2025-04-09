@@ -1,3 +1,42 @@
+# Meilleurs résultats actuels
+
+num_estimators : 200000
+
+other_column_to_drop = ['hc', 'weight_min',  'ptcl',  'max_power', 'weight_max', 'co']
+
+Public score: 0.0644
+
+-> Sans 'brand', 'model', 'car_class', 'grbx_type_ratios'
+
+-----------------------------------
+
+num_estimators : 120000
+
+other_column_to_drop = ['hc', 'weight_min',  'ptcl',  'max_power', 'weight_max', 'co']
+
+
+Public score: 0.0646
+
+-> Sans 'brand', 'model', 'car_class', 'grbx_type_ratios'
+
+
+# TESTS A EFFECTUER
+
+
+--> NE pas rajouter 'MODEL' mais avec grbx_type_ratios c'est proche
+
+
+
+---------------------------------------------------
+   n_estimators       MAE
+0         50000  0.076891
+1        100000  0.076902
+2        200000  0.076908
+---------------------------------------------------
+
+
+
+
 TEST DIFFERENT n_estimators :
 n_estimators: 10000 → MAE: 0.1007  
 test 11000  
