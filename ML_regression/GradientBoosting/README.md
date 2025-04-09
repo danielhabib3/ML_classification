@@ -70,7 +70,7 @@ TEST feature :
 A TESTER : ENLEVER WEIGHT_MIN, PTCL, hc
 
 
-📊 Impact des colonnes (trié par impact absolu sur MAE):
+Impact des colonnes (trié par impact absolu sur MAE):
 overall_cons              → MAE: 0.1580 | Différence: +0.0396
 urb_cons                  → MAE: 0.1543 | Différence: +0.0359
 exturb_cons               → MAE: 0.1333 | Différence: +0.0148

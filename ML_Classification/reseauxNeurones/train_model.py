@@ -8,7 +8,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 from data_processing import load_data
-import models 
+import models
 from sklearn.metrics import accuracy_score
 import signal
 import sys
@@ -23,7 +23,7 @@ WEIGHT_DECAY = 0
 
 
 # Fixer la seed pour garantir la reproductibilité
-SEED = 42  
+SEED = 42
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
@@ -32,10 +32,14 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Utilisation de : {device}")
 
 # Args
-parser = argparse.ArgumentParser(description="Entraînement d'un modèle de classification.")
-parser.add_argument("--model_name", type=str, default="TransformerModel", help="Nom du modèle à utiliser (doit être défini dans models.py)")
-parser.add_argument("--model_file", type=str, help="Chemin du fichier modèle à charger (optionnel)")
-parser.add_argument("--split_eval", action="store_true", help="Séparer le dataset en 90% train et 10% évaluation")
+parser = argparse.ArgumentParser(
+    description="Entraînement d'un modèle de classification.")
+parser.add_argument("--model_name", type=str, default="TransformerModel",
+                    help="Nom du modèle à utiliser (doit être défini dans models.py)")
+parser.add_argument("--model_file", type=str,
+                    help="Chemin du fichier modèle à charger (optionnel)")
+parser.add_argument("--split_eval", action="store_true",
+                    help="Séparer le dataset en 90% train et 10% évaluation")
 args = parser.parse_args()
 
 # Vérification du modèle fourni s'il est bien dans models.py
@@ -49,11 +53,14 @@ current_date = datetime.now().strftime("%m-%d_%H-%M")
 MODEL_PATH = f"saved_models/saved_{args.model_name}_{current_date}_epochs{EPOCHS}.pth"
 
 # POur enregistrer si on arrête pendant training
+
+
 def save_and_exit(sig, frame):
     print("\nInterruption détectée ! Sauvegarde du modèle en cours...")
     torch.save(model.state_dict(), MODEL_PATH)
     print(f"Modèle sauvegardé sous {MODEL_PATH}")
     sys.exit(0)
+
 
 signal.signal(signal.SIGINT, save_and_exit)
 
@@ -61,7 +68,8 @@ if __name__ == "__main__":
     # Chargement des données
     X, y = load_data(TRAIN_CSV)
     X_tensor = torch.tensor(X.values, dtype=torch.float32).to(device)
-    y_tensor = torch.tensor(y.values, dtype=torch.float32).unsqueeze(1).to(device)
+    y_tensor = torch.tensor(
+        y.values, dtype=torch.float32).unsqueeze(1).to(device)
 
     if args.split_eval:
         total_size = len(X_tensor)
@@ -72,34 +80,41 @@ if __name__ == "__main__":
         torch.manual_seed(SEED)
         np.random.seed(SEED)
 
-        train_dataset, eval_dataset = random_split(TensorDataset(X_tensor, y_tensor), [train_size, eval_size])
+        train_dataset, eval_dataset = random_split(
+            TensorDataset(X_tensor, y_tensor), [train_size, eval_size])
     else:
         train_dataset = TensorDataset(X_tensor, y_tensor)
         eval_dataset = None
 
     # Chargement des données dans des DataLoader
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    eval_loader = DataLoader(eval_dataset, batch_size=BATCH_SIZE) if eval_dataset else None
+    train_loader = DataLoader(
+        train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+    eval_loader = DataLoader(
+        eval_dataset, batch_size=BATCH_SIZE) if eval_dataset else None
 
     # Initialisation du modèle
     model = ModelClass(input_dim=X.shape[1]).to(device)
-    DROPOUT = getattr(model, 'dropout', 'unknown')  # Défaut à 'unknown' si non défini
+    # Défaut à 'unknown' si non défini
+    DROPOUT = getattr(model, 'dropout', 'unknown')
     MODEL_PATH = f"saved_models/saved_{args.model_name}_{current_date}_epochs{EPOCHS}_lr{LEARNING_RATE}_wd{WEIGHT_DECAY}_dropout{DROPOUT}.pth"
 
     # Chargement du modèle pré-entraîné si spécifié
     if args.model_file:
         MODEL_PATH = args.model_file
         if not os.path.exists(MODEL_PATH):
-            raise FileNotFoundError(f"Le fichier spécifié '{MODEL_PATH}' n'existe pas.")
+            raise FileNotFoundError(
+                f"Le fichier spécifié '{MODEL_PATH}' n'existe pas.")
         print(f"Chargement du modèle depuis {MODEL_PATH}")
         model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
     else:
-        print("Aucun modèle pré-entraîné spécifié. Début de l'entraînement à partir de zéro.")
+        print(
+            "Aucun modèle pré-entraîné spécifié. Début de l'entraînement à partir de zéro.")
 
     # Définition de la fonction de perte et de l'optimiseur
     criterion = nn.BCELoss()
-    #optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    # optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(
+        model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
     # Variables pour suivre les historiques
     loss_history = []
@@ -145,7 +160,8 @@ if __name__ == "__main__":
             eval_acc_history.append(eval_accuracy)
             print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Train Acc: {train_accuracy*100:.2f}%, Eval Acc: {eval_accuracy*100:.2f}%")
         else:
-            print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Train Acc: {train_accuracy*100:.2f}%")
+            print(
+                f"Epoch {epoch+1}/{EPOCHS}, Loss: {total_loss/len(train_loader):.4f}, Train Acc: {train_accuracy*100:.2f}%")
 
     # Sauvegarde du modèle après entraînement
     torch.save(model.state_dict(), MODEL_PATH)
