@@ -19,36 +19,29 @@ TEST_PATH = os.path.join(BASE_DIR, "..", "data",
 train_data = pd.read_csv(TRAIN_PATH)
 test_data = pd.read_csv(TEST_PATH)
 
-# Fonction de prétraitement avec une option pour enlever des colonnes
-
 
 def preprocess_data(train_data, test_data, cols_to_remove=[]):
     combined_data = pd.concat([train_data, test_data], axis=0)
 
-    # Suppression des colonnes spécifiées dans cols_to_remove
     cols_to_remove += ['id', 'brand', 'model', 'car_class', 'grbx_type_ratios']
     combined_data = combined_data.drop(cols_to_remove, axis=1)
 
-    # Conversion des variables catégorielles en variables dummy
+    # Conversion des variables catégorielles
     combined_data = pd.get_dummies(combined_data, columns=[
                                    'fuel_type', 'range', 'hybrid'], drop_first=True)
 
     # Remplir les valeurs manquantes par la médiane
     combined_data = combined_data.fillna(combined_data.median())
 
-    # Re-séparation des données en train et test
     train_data_processed = combined_data.iloc[:len(train_data), :]
     test_data_processed = combined_data.iloc[len(train_data):, :]
 
-    # Supprimer la target 'co2' du jeu de test
     if 'co2' in test_data_processed.columns:
         test_data_processed = test_data_processed.drop('co2', axis=1)
 
     return train_data_processed, test_data_processed
 
 # Fonction pour tester différentes configurations de colonnes à enlever
-
-
 def test_model(cols_to_remove):
     print(f"Testing with columns removed: {cols_to_remove}")
 
@@ -72,7 +65,7 @@ def test_model(cols_to_remove):
 
     # Entraînement Gradient Boosting
     model = GradientBoostingRegressor(
-        n_estimators=21000,
+        n_estimators=100000,
         learning_rate=0.05,
         max_depth=5,
         min_samples_split=4,

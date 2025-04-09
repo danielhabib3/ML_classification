@@ -77,7 +77,7 @@ if X_val is not None and y_val is not None:
 
 # Gradient Boosting
 model = GradientBoostingRegressor(
-    n_estimators=500000,
+    n_estimators=120000,
     learning_rate=0.05,
     max_depth=5,
     min_samples_split=4,
