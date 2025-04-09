@@ -5,22 +5,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 import os
 
-# Chemins
-path_classification_data = "../data/classification/"
-path_train_csv = f"{path_classification_data}/train.csv"
-path_test_csv = f"{path_classification_data}/test.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "classification", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "classification", "test.csv")
 
 # Lecture du train.csv
-with open(path_train_csv) as my_csv_file:
+with open(TRAIN_PATH) as my_csv_file:
     header_and_data = list(csv.reader(my_csv_file, delimiter=','))
 
 df_train_full = pd.DataFrame(header_and_data[1:], columns=header_and_data[0])
 
 # Lecture du test.csv
-with open(path_test_csv) as my_csv_test_file:
+with open(TEST_PATH) as my_csv_test_file:
     header_and_data_test = list(csv.reader(my_csv_test_file, delimiter=','))
 
-df_test = pd.DataFrame(header_and_data_test[1:], columns=header_and_data_test[0])
+df_test = pd.DataFrame(
+    header_and_data_test[1:], columns=header_and_data_test[0])
 
 # Conversion en types numériques si besoin
 df_train_full = df_train_full.apply(pd.to_numeric, errors='ignore')
@@ -37,8 +40,11 @@ learning_rate = 0.1
 max_depth = 7
 
 # Fonction pour entraîner et évaluer un modèle
+
+
 def train_and_evaluate(X_data, y_data):
-    X_train, X_val, y_train, y_val = train_test_split(X_data, y_data, test_size=test_size, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_data, y_data, test_size=test_size, random_state=42)
     clf = GradientBoostingClassifier(
         n_estimators=n_estimators,
         learning_rate=learning_rate,
@@ -49,6 +55,7 @@ def train_and_evaluate(X_data, y_data):
     y_val_pred = clf.predict(X_val)
     accuracy = accuracy_score(y_val, y_val_pred)
     return round(accuracy * 100, 2)
+
 
 # Accuracy de base avec toutes les colonnes
 base_accuracy = train_and_evaluate(X, y)

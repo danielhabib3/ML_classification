@@ -8,9 +8,18 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
+import os
 
-train_data = pd.read_csv('data/regression/train.csv')
-test_data = pd.read_csv('data/regression/test.csv')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "regression", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "regression", "test.csv")
+
+
+train_data = pd.read_csv(TRAIN_PATH)
+test_data = pd.read_csv(TEST_PATH)
 
 
 def preprocess_data(train_data, test_data):
@@ -56,7 +65,7 @@ print(f'Random Forest Regressor MAE: {mae}')
 test_predictions = regressor.predict(test_data)
 
 submission = pd.DataFrame({
-    'id': pd.read_csv('test.csv')['id'],
+    'id': pd.read_csv(TEST_PATH)['id'],
     'co2': test_predictions
 })
 

@@ -4,12 +4,22 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import GradientBoostingRegressor
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "regression", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "regression", "test.csv")
 
 # Chargement des données
-train_data = pd.read_csv('../data/regression/train.csv')
-test_data = pd.read_csv('../data/regression/test.csv')
+train_data = pd.read_csv(TRAIN_PATH)
+test_data = pd.read_csv(TEST_PATH)
 
 # Prétraitement
+
+
 def preprocess_data(train_data, test_data):
     combined_data = pd.concat([train_data, test_data], axis=0)
 
@@ -29,13 +39,15 @@ def preprocess_data(train_data, test_data):
 
     return train_data_processed, test_data_processed
 
+
 # Préparation des données
 train_data, test_data = preprocess_data(train_data, test_data)
 X = train_data.drop('co2', axis=1)
 y = train_data['co2']
 
 test_size = 0.1
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=42)
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=test_size, random_state=42)
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -55,12 +67,12 @@ model = GradientBoostingRegressor(
 model.fit(X_train_scaled, y_train)
 baseline_preds = model.predict(X_val_scaled)
 baseline_mae = mean_absolute_error(y_val, baseline_preds)
-print(f'✅ MAE de base avec toutes les features: {baseline_mae:.4f}\n')
+print(f'MAE de base avec toutes les features: {baseline_mae:.4f}\n')
 
-# 🔍 Impact de la suppression de chaque feature
+# Impact de la suppression de chaque feature
 results = []
 for col in X.columns:
-    print(f"🧪 Test sans la colonne: {col}")
+    print(f"Test sans la colonne: {col}")
 
     X_mod = X.drop(columns=[col])
 
@@ -85,11 +97,12 @@ for col in X.columns:
     val_preds_mod = model_mod.predict(X_val_mod_scaled)
     mae_mod = mean_absolute_error(y_val, val_preds_mod)
 
-    print(f"→ MAE sans {col}: {mae_mod:.4f} (diff: {mae_mod - baseline_mae:+.4f})\n")
+    print(
+        f"→ MAE sans {col}: {mae_mod:.4f} (diff: {mae_mod - baseline_mae:+.4f})\n")
     results.append((col, mae_mod, mae_mod - baseline_mae))
 
-# 🔚 Résumé
+# Résumé
 results_sorted = sorted(results, key=lambda x: abs(x[2]), reverse=True)
-print("\n📊 Impact des colonnes (trié par impact absolu sur MAE):")
+print("\nImpact des colonnes (trié par impact absolu sur MAE):")
 for col, mae, diff in results_sorted:
     print(f"{col:<25} → MAE: {mae:.4f} | Différence: {diff:+.4f}")

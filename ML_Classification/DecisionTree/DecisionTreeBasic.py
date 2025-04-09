@@ -1,33 +1,41 @@
 import csv
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
+import os
 
-path_classification_data = "data/classification/"
-path_train_csv = f"{path_classification_data}/train.csv"
-path_test_csv = f"{path_classification_data}/test.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "classification", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "classification", "test.csv")
+# Path to the classification data
+path_classification_data = os.path.join(
+    BASE_DIR, "..", "data", "classification")
 
-with open(path_train_csv) as my_csv_train_file:
-  header_and_data_train = list(csv.reader(my_csv_train_file, delimiter=','))
+with open(TRAIN_PATH) as my_csv_train_file:
+    header_and_data_train = list(csv.reader(my_csv_train_file, delimiter=','))
 
 # Conversion en DataFrame
-df_train = pd.DataFrame(header_and_data_train[1:], columns=header_and_data_train[0])
+df_train = pd.DataFrame(
+    header_and_data_train[1:], columns=header_and_data_train[0])
 
 
-with open(path_test_csv) as my_csv_test_file:
-  header_and_data_test = list(csv.reader(my_csv_test_file, delimiter=','))
+with open(TEST_PATH) as my_csv_test_file:
+    header_and_data_test = list(csv.reader(my_csv_test_file, delimiter=','))
 
 # Conversion en DataFrame
-df_test = pd.DataFrame(header_and_data_test[1:], columns=header_and_data_test[0])
+df_test = pd.DataFrame(
+    header_and_data_test[1:], columns=header_and_data_test[0])
 
-
-
-# Nettoyage des données inutiles car on voit déjà sur Kaggle qu'il n'y a pas de données manquantes, valeurs abberantes ...
+# Nettoyage des données inutile car on voit déjà sur Kaggle qu'il n'y a pas de données manquantes, valeurs abberantes ...
 
 print(df_train)
 
-## Decision Tree Algorithms
+# Decision Tree Algorithms
 clf = DecisionTreeClassifier(random_state=0)
-clf.fit(df_train.drop(columns=['id', 'bc_price_evo']), df_train['bc_price_evo'])
+clf.fit(df_train.drop(
+    columns=['id', 'bc_price_evo']), df_train['bc_price_evo'])
 
 
 # Prédictions sur les données de test

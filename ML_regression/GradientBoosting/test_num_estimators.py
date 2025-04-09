@@ -4,12 +4,21 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import GradientBoostingRegressor
+import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "regression", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "regression", "test.csv")
 # Chargement des données
-train_data = pd.read_csv('../data/regression/train.csv')
-test_data = pd.read_csv('../data/regression/test.csv')
+train_data = pd.read_csv(TRAIN_PATH)
+test_data = pd.read_csv(TEST_PATH)
 
 # Prétraitement
+
+
 def preprocess_data(train_data, test_data):
     combined_data = pd.concat([train_data, test_data], axis=0)
 
@@ -29,6 +38,7 @@ def preprocess_data(train_data, test_data):
 
     return train_data_processed, test_data_processed
 
+
 # Préparation des données
 train_data, test_data = preprocess_data(train_data, test_data)
 X = train_data.drop('co2', axis=1)
@@ -37,16 +47,16 @@ y = train_data['co2']
 test_size = 0.1
 
 X_train, X_val, y_train, y_val = train_test_split(
-    X, y, test_size=test_size , random_state=42)
+    X, y, test_size=test_size, random_state=42)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_val = scaler.transform(X_val)
 
-# 📊 Test de différents n_estimators
+# Test de différents n_estimators
 results = []
 
-#l = list(range(20000, 30000, 1000))
+# l = list(range(20000, 30000, 1000))
 l = [100000]
 print(l)
 
@@ -63,14 +73,14 @@ for n in l:
         random_state=42
     )
     model.fit(X_train, y_train)
-    
-    if(test_size>0):
+
+    if (test_size > 0):
 
         val_predictions = model.predict(X_val)
         mae = mean_absolute_error(y_val, val_predictions)
         results.append((n, mae))
         print(f'n_estimators: {n} → MAE: {mae:.5f}')
 
-# 🏆 Afficher le meilleur résultat
+# Afficher le meilleur résultat
 best_n, best_mae = min(results, key=lambda x: x[1])
 print(f'\nMeilleur n_estimators: {best_n} avec MAE: {best_mae:.4f}')

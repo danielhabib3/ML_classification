@@ -6,25 +6,35 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import GradientBoostingRegressor
+import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "regression", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "regression", "test.csv")
 # Chargement des données
-train_data = pd.read_csv('../data/regression/train.csv')
-test_data = pd.read_csv('../data/regression/test.csv')
+train_data = pd.read_csv(TRAIN_PATH)
+test_data = pd.read_csv(TEST_PATH)
 
-test_size = 0.0  
+test_size = 0.0
 
-other_column_to_drop = ['hc', 'weight_min', 'ptcl', 'max_power', 'weight_max', 'co']
+other_column_to_drop = ['hc', 'weight_min',
+                        'ptcl', 'max_power', 'weight_max', 'co']
 
 # Prétraitement
+
+
 def preprocess_data(train_data, test_data):
     combined_data = pd.concat([train_data, test_data], axis=0)
 
-    columns_to_drop = ['id', 'brand', 'model', 'car_class', 'grbx_type_ratios'] + other_column_to_drop
-
+    columns_to_drop = ['id', 'brand', 'model', 'car_class',
+                       'grbx_type_ratios'] + other_column_to_drop
 
     combined_data = combined_data.drop(columns_to_drop, axis=1)
 
-    combined_data = pd.get_dummies(combined_data, columns=[ 
+    combined_data = pd.get_dummies(combined_data, columns=[
         'fuel_type', 'range', 'hybrid'], drop_first=True)
 
     combined_data = combined_data.fillna(combined_data.median())
@@ -36,6 +46,7 @@ def preprocess_data(train_data, test_data):
         test_data_processed = test_data_processed.drop('co2', axis=1)
 
     return train_data_processed, test_data_processed
+
 
 # Prétraitement
 train_data, test_data = preprocess_data(train_data, test_data)
@@ -91,7 +102,7 @@ test_predictions = model.predict(test_data_scaled)
 
 # Génération du fichier de soumission
 submission = pd.DataFrame({
-    'id': pd.read_csv('../data/regression/test.csv')['id'],
+    'id': pd.read_csv(TEST_PATH)['id'],
     'co2': test_predictions
 })
 

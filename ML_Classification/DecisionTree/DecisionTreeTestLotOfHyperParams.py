@@ -6,17 +6,19 @@ from sklearn import metrics
 import itertools
 import time
 import csv
+import os
 
-# Chemins des fichiers
-path_classification_data = "data/classification/"
-path_train_csv = f"{path_classification_data}/train.csv"
-path_test_csv = f"{path_classification_data}/test.csv"
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "classification", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "classification", "test.csv")
 # Chargement des données
-with open(path_test_csv) as my_csv_file:
+with open(TEST_PATH) as my_csv_file:
     test_data = list(csv.reader(my_csv_file, delimiter=','))
 
-with open(path_train_csv) as my_csv_file:
+with open(TRAIN_PATH) as my_csv_file:
     train_data = list(csv.reader(my_csv_file, delimiter=','))
 
 # Conversion en DataFrame
@@ -24,7 +26,8 @@ df_test = pd.DataFrame(test_data[1:], columns=test_data[0])
 df_train = pd.DataFrame(train_data[1:], columns=train_data[0])
 
 # Séparation des features (X) et de la cible (y)
-X = df_train[['date', 'hour', 'bc_price', 'bc_demand', 'ab_price', 'ab_demand', 'transfer']]
+X = df_train[['date', 'hour', 'bc_price',
+              'bc_demand', 'ab_price', 'ab_demand', 'transfer']]
 y = df_train['bc_price_evo']
 
 # Conversion des types (si nécessaire)
@@ -45,10 +48,12 @@ splitters = ["best", "random"]
 random_states = [42, 0, 1, 123]  # Différents random_state à tester
 
 # Compteur de tests
-total_tests = len(max_depths) * len(min_samples_splits) * len(min_samples_leaves) * len(criterions) * len(max_features_options) * len(splitters) * len(random_states)
+total_tests = len(max_depths) * len(min_samples_splits) * len(min_samples_leaves) * \
+    len(criterions) * len(max_features_options) * \
+    len(splitters) * len(random_states)
 test_count = 0
 
-print(f"🔍 Début des tests... ({total_tests} combinaisons possibles)\n")
+print(f"Début des tests... ({total_tests} combinaisons possibles)\n")
 
 # Dictionnaire pour stocker les résultats moyens de chaque combinaison
 accuracies_dict = {}
@@ -56,7 +61,7 @@ accuracies_dict = {}
 # Boucles imbriquées pour tester toutes les combinaisons
 start_time = time.time()
 for depth, split, leaf, criterion, max_feat, splitter in itertools.product(
-    max_depths, min_samples_splits, min_samples_leaves, criterions, max_features_options, splitters):
+        max_depths, min_samples_splits, min_samples_leaves, criterions, max_features_options, splitters):
 
     # Variable pour stocker les précisions pour chaque random_state
     accuracies_per_combination = []
@@ -64,7 +69,8 @@ for depth, split, leaf, criterion, max_feat, splitter in itertools.product(
     # Test avec plusieurs random_state
     for rand_state in random_states:
         # Division en ensemble d'entraînement et de test avec random_state actuel
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=rand_state)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.1, random_state=rand_state)
 
         # Création du modèle avec les hyperparamètres actuels
         clf = DecisionTreeClassifier(
@@ -89,7 +95,8 @@ for depth, split, leaf, criterion, max_feat, splitter in itertools.product(
 
     # Calcul de la moyenne de la précision pour cette combinaison de paramètres
     mean_accuracy = np.mean(accuracies_per_combination)
-    accuracies_dict[(depth, split, leaf, criterion, max_feat, splitter)] = mean_accuracy
+    accuracies_dict[(depth, split, leaf, criterion,
+                     max_feat, splitter)] = mean_accuracy
 
     # Affichage des résultats intermédiaires tous les 500 tests
     test_count += 1
@@ -115,7 +122,7 @@ end_time = time.time()
 elapsed_time = end_time - start_time
 
 # Affichage des meilleurs paramètres trouvés
-print("\n✅ Meilleurs hyperparamètres :")
+print("\nMeilleurs hyperparamètres :")
 print(best_params)
-print(f"🎯 Précision moyenne maximale obtenue : {best_accuracy:.4f}")
-print(f"⏱️ Temps total d'exécution : {elapsed_time:.2f} secondes")
+print(f"Précision moyenne maximale obtenue : {best_accuracy:.4f}")
+print(f"Temps total d'exécution : {elapsed_time:.2f} secondes")

@@ -6,12 +6,22 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import GradientBoostingRegressor
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "regression", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "regression", "test.csv")
 
 # Chargement des données
-train_data = pd.read_csv('../data/regression/train.csv')
-test_data = pd.read_csv('../data/regression/test.csv')
+train_data = pd.read_csv(TRAIN_PATH)
+test_data = pd.read_csv(TEST_PATH)
 
 # Fonction de prétraitement avec une option pour enlever des colonnes
+
+
 def preprocess_data(train_data, test_data, cols_to_remove=[]):
     combined_data = pd.concat([train_data, test_data], axis=0)
 
@@ -20,7 +30,8 @@ def preprocess_data(train_data, test_data, cols_to_remove=[]):
     combined_data = combined_data.drop(cols_to_remove, axis=1)
 
     # Conversion des variables catégorielles en variables dummy
-    combined_data = pd.get_dummies(combined_data, columns=['fuel_type', 'range', 'hybrid'], drop_first=True)
+    combined_data = pd.get_dummies(combined_data, columns=[
+                                   'fuel_type', 'range', 'hybrid'], drop_first=True)
 
     # Remplir les valeurs manquantes par la médiane
     combined_data = combined_data.fillna(combined_data.median())
@@ -36,18 +47,22 @@ def preprocess_data(train_data, test_data, cols_to_remove=[]):
     return train_data_processed, test_data_processed
 
 # Fonction pour tester différentes configurations de colonnes à enlever
+
+
 def test_model(cols_to_remove):
     print(f"Testing with columns removed: {cols_to_remove}")
 
     # Prétraitement des données
-    train_data_processed, test_data_processed = preprocess_data(train_data, test_data, cols_to_remove)
+    train_data_processed, test_data_processed = preprocess_data(
+        train_data, test_data, cols_to_remove)
 
     # Séparation des features et de la target
     X = train_data_processed.drop('co2', axis=1)
     y = train_data_processed['co2']
 
     # Split train / validation
-    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(
+        X, y, test_size=0.1, random_state=42)
 
     # Standardisation
     scaler = StandardScaler()
@@ -78,7 +93,7 @@ def test_model(cols_to_remove):
 
     # Génération du fichier de soumission
     submission = pd.DataFrame({
-        'id': pd.read_csv('../data/regression/test.csv')['id'],
+        'id': pd.read_csv(TEST_PATH)['id'],
         'co2': test_predictions
     })
 
@@ -100,10 +115,12 @@ def test_model(cols_to_remove):
     submission.to_csv(path_submit, index=False)
     print(f"Submission file created: {path_submit}")
 
+
 # Configurations de colonnes à tester
-columns_to_remove_config1 = ['hc','weight_min','ptcl','max_power','weight_max','co']
-columns_to_remove_config2 = ['ptcl','weight_min','hc']
-columns_to_remove_config3 = ['ptcl','hc']
+columns_to_remove_config1 = ['hc', 'weight_min',
+                             'ptcl', 'max_power', 'weight_max', 'co']
+columns_to_remove_config2 = ['ptcl', 'weight_min', 'hc']
+columns_to_remove_config3 = ['ptcl', 'hc']
 
 
 # Tester les différentes configurations

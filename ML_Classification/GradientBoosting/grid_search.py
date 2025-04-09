@@ -5,14 +5,16 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
-# Chemins vers les fichiers
-path_classification_data = "../data/classification/"
-path_train_csv = f"{path_classification_data}/train.csv"
-path_test_csv = f"{path_classification_data}/test.csv"
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Path to the dataset
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "data",
+                          "classification", "train.csv")
+TEST_PATH = os.path.join(BASE_DIR, "..", "data",
+                         "classification", "test.csv")
 # Lecture CSV
-with open(path_train_csv) as my_csv_file:
+with open(TRAIN_PATH) as my_csv_file:
     header_and_data = list(csv.reader(my_csv_file, delimiter=','))
 
 # Conversion en DataFrame
@@ -66,7 +68,8 @@ df_predictions = pd.DataFrame({
 })
 
 # Précision
-accuracy = (df_predictions['bc_price_evo'].values == y_test.values).mean() * 100
+accuracy = (df_predictions['bc_price_evo'].values ==
+            y_test.values).mean() * 100
 print(f"Précision du modèle (Gradient Boosting optimisé) : {accuracy:.2f}%")
 
 # Rapport de classification
