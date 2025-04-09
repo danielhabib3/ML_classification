@@ -41,7 +41,8 @@ param_grid = {
 
 # Grid Search
 grid_search = GridSearchCV(
-    GradientBoostingClassifier(n_estimators=500, random_state=0), # On fixe n_estimators car on sait grâce à nos anciens tests que si c'est trop élévé, le grid_search va être trop long et d'ailleurs, o nsait déjà que plus on l'augmente mieux c'est
+    # On fixe n_estimators car on sait grâce à nos anciens tests que si c'est trop élévé, le grid_search va être trop long et d'ailleurs, o nsait déjà que plus on l'augmente mieux c'est
+    GradientBoostingClassifier(n_estimators=500, random_state=0),
     param_grid,
     cv=5,
     scoring='accuracy',
@@ -63,13 +64,8 @@ df_predictions = pd.DataFrame({
     'bc_price_evo': y_pred
 })
 
-<<<<<<< HEAD:ML_Classification/GradientBoosting/grid_search.py
-# Précision
 accuracy = (df_predictions['bc_price_evo'].values ==
             y_test.values).mean() * 100
-=======
-accuracy = (df_predictions['bc_price_evo'].values == y_test.values).mean() * 100
->>>>>>> 1a1e2532ca6f48553a033f7093d2429f1e6a952b:ML_Classification/GradientBoosting/grid_search_initial.py
 print(f"Précision du modèle (Gradient Boosting optimisé) : {accuracy:.2f}%")
 
 print("\nRapport de classification :")
